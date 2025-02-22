@@ -7,8 +7,8 @@
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd <project-directory>
+git clone https://github.com/KosmonikOS/coordination_center_test_task.git
+cd coordination_center_test_task
 ```
 
 2. Create and activate a virtual environment (recommended):
