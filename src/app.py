@@ -3,9 +3,11 @@ from extractor import ProjectDataExtractor
 from docx_filler import ProjectPassportFiller
 from formatted_data import FormattedProjectData
 from langchain_groq import ChatGroq
+from logger import setup_logging
 import streamlit as st
 import os
 import tempfile
+import logging
 
 
 def init_llm():
@@ -18,6 +20,7 @@ def init_llm():
 
 
 def main():
+    setup_logging()
     st.title("Генератор паспорта проекта")
 
     if "formatted_data" not in st.session_state:
@@ -44,7 +47,8 @@ def main():
                     FormattedProjectData.from_project_data(project_data)
                 )
                 st.success("Данные успешно извлечены!")
-            except Exception:
+            except Exception as e:
+                logging.error(f"Error processing description: {str(e)}", exc_info=True)
                 st.error(f"Ошибка при обработке")
                 return
 
@@ -84,7 +88,7 @@ def main():
         formatted_data.project_result_vision = st.text_area(
             "Образ результата *",
             formatted_data.project_result_vision,
-            height=150,
+            height=100,
             placeholder="Обязательное поле",
         )
         if not formatted_data.project_result_vision:
@@ -256,7 +260,8 @@ def main():
                                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                             )
                         os.remove(tmp_file.name)
-                except Exception:
+                except Exception as e:
+                    logging.error(f"Error generating document: {str(e)}", exc_info=True)
                     st.error(f"Ошибка при генерации документа")
 
 
