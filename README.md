@@ -1,41 +1,56 @@
-## Prerequisites
+## Необходимые компоненты
 
-- Python 3.10 or higher
-- pip (Python package installer)
+- Python 3.10 или выше
+- pip (установщик пакетов Python)
 
-## Set up
+## Установка
 
-1. Clone the repository:
+1. Клонируйте репозиторий:
 ```bash
 git clone https://github.com/KosmonikOS/coordination_center_test_task.git
 cd coordination_center_test_task
 ```
 
-2. Create and activate a virtual environment (recommended):
+2. Создайте и активируйте виртуальное окружение (рекомендуется):
 ```bash
 python -m venv venv
-# On Windows
+# Для Windows
 venv\Scripts\activate
-# On Unix or MacOS
+# Для Unix или MacOS
 source venv/bin/activate
 ```
 
-3. Install the required dependencies:
+3. Установите необходимые зависимости:
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Set up environment variables:
-Create a `.env` file in the root directory and add the following configurations:
+4. Настройте переменные окружения:
+Создайте файл `.env` в корневой директории и добавьте следующие настройки:
 ```plaintext
-OPENAI_API_KEY=<API_key>
-OPENAI_BASE_URL=<URL_to_OpenAI_compatible_API>
-OPENAI_MODEL=<Model_to_use>
+OPENAI_API_KEY=<API_ключ>
+OPENAI_BASE_URL=<URL_к_совместимому_с_OpenAI_API>
+OPENAI_MODEL=<Используемая_модель>
 OPENAI_TEMPERATURE=0.0
 TEMPLATE_PATH=templates/template.docx
 ```
 
-5. Run Streamlit client from the root directory:
+5. Запустите Streamlit клиент из корневой директории:
 ```bash
 streamlit run src/app.py
 ```
+
+## Архитектура
+
+Решение построено на двух ключевых концепциях:
+
+1. **Структурированное декодирование (Structured Decoding)** - Этот подход помогает извлекать данные в определённом формате из текстовых описаний. Он позволяет системе последовательно анализировать и структурировать информацию из свободных текстовых входных данных.
+
+2. **Пользовательская цепочка рассуждений (Custom Chain-of-Thought)** - Эта методика помогает при написании SMART результатов. Она проводит модель через определённые этапы размышления перед составлением финального результата, обеспечивая более продуманные и структурированные ответы.
+
+## Ограничения
+
+В настоящее время система использует бесплатный API для взаимодействия с LLM, что создаёт следующие ограничения:
+
+- Возможно длительное время обработки из-за низкой пропускной способности API
+- Структурированное декодирование может иногда давать сбои из-за ограничений API
