@@ -1,4 +1,3 @@
-from datetime import date
 from pydantic import BaseModel
 from extraction_models import ProjectData
 
@@ -39,20 +38,16 @@ class FormattedProjectData(BaseModel):
     def from_project_data(cls, project_data: ProjectData) -> "FormattedProjectData":
         """Create formatted data from ProjectData."""
 
-        def format_date(date_obj: date) -> str:
-            """Format date to Russian format."""
-            return date_obj.strftime("%d.%m.%Y") if date_obj else ""
-
         def format_stages_results(stages: list) -> str:
             """Format project stages and results."""
             result = []
             for i, stage in enumerate(stages, 1):
                 stage_results = "\n".join(
-                    [f"• {result}" for result in stage.smart_results]
+                    [f"• {result.result_description}" for result in stage.smart_results]
                 )
                 stage_text = (
                     f"Этап №{i}\n"
-                    f"{format_date(stage.stage_start_date)}-{format_date(stage.stage_end_date)}.\n"
+                    f"{stage.stage_start_date}-{stage.stage_end_date}.\n"
                     f"{stage.stage_name}:\n"
                     f"{stage_results}"
                 )
@@ -63,7 +58,7 @@ class FormattedProjectData(BaseModel):
             """Format project end dates based on stages."""
             result = []
             for i, stage in enumerate(stages, 1):
-                result.append(f"Этап {i} – {format_date(stage.stage_end_date)}")
+                result.append(f"Этап {i} – {stage.stage_end_date}")
             return "\n".join(result)
 
         team = project_data.project_team
@@ -80,7 +75,7 @@ class FormattedProjectData(BaseModel):
             project_steering_committee="\n".join(
                 project_data.project_steering_committee
             ),
-            project_start_date=format_date(project_data.project_start_date),
+            project_start_date=project_data.project_start_date,
             project_end_date=format_end_date(project_data.project_stages),
             project_stages_results=format_stages_results(project_data.project_stages),
             project_initiator=team.project_initiator or "Не указан",

@@ -1,12 +1,61 @@
 from typing import Optional
 from pydantic import BaseModel, Field
-from datetime import date
+
+
+class SMARTResult(BaseModel):
+    """
+    Model to capture the aspects of a SMART goal for a project stage.
+    fields specific, measurable, achievable, relevant, time_bound are used as a checklist for CoT
+    result_description is a compiled field from the SMART fields
+    """
+
+    specific: Optional[str] = Field(
+        ...,
+        description="Конкретное описание результата, что должно быть достигнуто, с ссылкой на исходный текст.",
+        examples=[
+            "Не указано",
+            "Повысить оперативность реагирования на обращения граждан. Цитата: 'Команде получилось повысить оперативность реагирования на обращения граждан на 20%.'",
+        ],
+    )
+    measurable: Optional[str] = Field(
+        ...,
+        description="Критерии или показатели, по которым можно измерить прогресс, с ссылкой на исходный текст.",
+        examples=[
+            "Не указано",
+            "Увеличить количество обращений граждан на 20%. Цитата: 'Команде удалось увеличить количество обращений граждан на 20%.'",
+        ],
+    )
+    achievable: Optional[str] = Field(
+        ...,
+        description="Обоснование, почему данный результат реалистичен, с ссылкой на исходный текст.",
+        examples=[
+            "Не указано",
+            "Использование современных технологий и инструментов для ускорения обработки обращений. Цитата: 'Команда использовала современные технологии и инструменты для ускорения обработки обращений.'",
+        ],
+    )
+    relevant: Optional[str] = Field(
+        ...,
+        description="Описание того, как результат согласуется с общей целью проекта или стратегией организации, с ссылкой на исходный текст.",
+        examples=[
+            "Не указано",
+            "Результат соответствует целям и задачам проекта по повышению эффективности работы органов власти. Цитата: 'Результат соответствует целям и задачам проекта по повышению эффективности работы органов власти.'",
+        ],
+    )
+    time_bound: Optional[str] = Field(
+        ...,
+        description="Четко указанные временные рамки, в пределах которых результат должен быть достигнут (например, крайний срок), с ссылкой на исходный текст.",
+        examples=["Не указано", "До 31 марта 2025 года."],
+    )
+    result_description: str = Field(
+        ...,
+        description="Компиляция полей specific, measurable, achievable, relevant, time_bound в единый абзац.",
+        example="Повысили оперативность реагирования на обращения граждан на 20% к 31 марта 2025 года.",
+    )
 
 
 class ProjectStage(BaseModel):
     """
-    Model for each stage of the project.
-    Will be used to extract data via LLM structured decoding.
+    Model for each stage of the project, including SMART results.
     """
 
     stage_name: str = Field(
@@ -19,25 +68,24 @@ class ProjectStage(BaseModel):
             "Тестирование в малых регионах",
         ],
     )
-    stage_start_date: date = Field(
+    stage_start_date: str = Field(
         ...,
         description="Дата начала этапа (формат YYYY-MM-DD)",
         example="2023-01-01",
     )
-    stage_end_date: date = Field(
-        ...,
+    stage_end_date: str = Field(
         description="Дата окончания этапа (формат YYYY-MM-DD)",
         example="2023-12-31",
     )
-    smart_results: list[str] = Field(
-        ..., description="Результаты, прописанные по методологии SMART"
+    smart_results: list[SMARTResult] = Field(
+        ...,
+        description="Результаты этапа, прописанные по методологии SMART",
     )
 
 
 class ProjectTeam(BaseModel):
     """
     Model for the project team roles and members.
-    Will be used to extract data via LLM structured decoding.
     """
 
     project_initiator: Optional[str] = Field(
@@ -94,8 +142,7 @@ class ProjectTeam(BaseModel):
 
 class ProjectData(BaseModel):
     """
-    Main model that holds all the fields to extract from the LLM's JSON output.
-    Will be used to extract data via LLM structured decoding.
+    Model to capture all fields related to project description.
     """
 
     project_name: str = Field(
@@ -105,29 +152,6 @@ class ProjectData(BaseModel):
         ...,
         description="Поручение о старте проекта (форма поручения, устное/письменное поручение)",
         example="Письменное поручение",
-    )
-    project_goal: str = Field(
-        ...,
-        description="Цель проекта: краткое описание ключевых задач и результатов, которых проект стремится достичь.",
-        example="Повысить оперативность реагирования на обращения граждан.",
-    )
-    project_result_vision: str = Field(
-        ...,
-        description="Образ результата проекта: описание итогового результата и его характеристик, демонстрирующих успех проекта.",
-        example="Интерактивная платформа с быстрым доступом к аналитическим данным.",
-    )
-    project_stages: list[ProjectStage] = Field(
-        ..., description="Список этапов и результатов проекта"
-    )
-    project_constraints_exclusions: list[str] = Field(
-        ...,
-        description="Ограничения и исключения проекта: список ограничений, рамок и аспектов, которые вне сферы проекта, влияющих на его реализацию.",
-        example=["Финансовые ограничения", "Ограниченный кадровый состав"],
-    )
-    project_risks_assumptions: list[str] = Field(
-        ...,
-        description="Риски и допущения проекта: перечень потенциальных угроз и предположений, на которых базируется план реализации проекта.",
-        example=["Риск задержки поставок", "Предположение о стабильности рынка"],
     )
     project_stakeholders: list[str] = Field(
         ...,
@@ -143,8 +167,32 @@ class ProjectData(BaseModel):
         example=["Шубин", "Ицхаков", "Белова"],
     )
     project_team: ProjectTeam = Field(..., description="Команда проекта")
-    project_start_date: date = Field(
-        ...,
+    project_start_date: str = Field(
         description="Дата начала проекта (формат YYYY-MM-DD)",
         example="2023-01-01",
+    )
+    # project_stages are placed above project_goal, project_result_vision, project_constraints_exclusions and project_risks_assumptions
+    # this simulate CoT and force model to reason more.
+    project_stages: list[ProjectStage] = Field(
+        ..., description="Список этапов и результатов проекта"
+    )
+    project_goal: str = Field(
+        ...,
+        description="Цель проекта: краткое описание ключевых задач и результатов, которых проект стремится достичь.",
+        example="Повысить оперативность реагирования на обращения граждан.",
+    )
+    project_result_vision: str = Field(
+        ...,
+        description="Образ результата проекта: описание итогового результата и его характеристик, демонстрирующих успех проекта.",
+        example="Интерактивная платформа с быстрым доступом к аналитическим данным.",
+    )
+    project_constraints_exclusions: list[str] = Field(
+        ...,
+        description="Ограничения и исключения проекта: список ограничений, рамок и аспектов, которые вне сферы проекта, влияющих на его реализацию.",
+        example=["Финансовые ограничения", "Ограниченный кадровый состав"],
+    )
+    project_risks_assumptions: list[str] = Field(
+        ...,
+        description="Риски и допущения проекта: перечень потенциальных угроз и предположений, на которых базируется план реализации проекта.",
+        example=["Риск задержки поставок", "Предположение о стабильности рынка"],
     )
